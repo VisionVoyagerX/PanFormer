@@ -1,2 +1,2 @@
 # PanFormer
-PanFormer Pansharpenning method pytorch implementation
+PanFormer as implemented in https://github.com/zhysora/PanFormer
