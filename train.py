@@ -264,7 +264,7 @@ def main():
                               'tr_metrics': tr_metrics,
                               # 'val_metrics': val_metrics,
                               'test_metrics': test_metrics}
-                save_checkpoint(checkpoint, 'pnn_model',
+                save_checkpoint(checkpoint, 'panformer',
                                 current_daytime + '_best_test')
 
     print('==> training ended <==')
