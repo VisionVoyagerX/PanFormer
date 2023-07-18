@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from .common.modules import conv3x3, SwinModule
+import matplotlib.pyplot as plt
 
 class CrossSwinTransformer(nn.Module):
     def __init__(self, n_feats=64, n_heads=4, head_dim=8, win_size=4,
@@ -70,8 +71,10 @@ class CrossSwinTransformer(nn.Module):
 
     def forward(self, pan, ms):
         #channel-wise normalization
-        pan = (pan - self.pan_mean) / self.pan_std
-        ms = (ms - self.mslr_mean) / self.mslr_std
+        #pan = (pan - self.pan_mean) / self.pan_std
+        #ms = (ms - self.mslr_mean) / self.mslr_std
+        pan = data_normalize(pan, 10)
+        ms = data_normalize(ms, 10)
 
 
         pan_feat = self.pan_encoder(pan)
@@ -101,11 +104,40 @@ class CrossSwinTransformer(nn.Module):
         output = torch.clamp(output, 0, 2 ** 10 - .5)
 
 
-        output = output * self.mslr_std + self.mslr_mean
-
+        #output = output * self.mslr_std + self.mslr_mean
+        output = data_denormalize(output, 10)
 
 
         return output
+
+def data_normalize(img, bit_depth):
+    """ Normalize the data to [0, 1)
+
+    Args:
+        img_dict (dict[str, torch.Tensor]): images in torch.Tensor
+        bit_depth (int): original data range in n-bit
+    Returns:
+        dict[str, torch.Tensor]: images after normalization
+    """
+    max_value = 2 ** bit_depth - .5
+    
+    img = img / max_value
+    return img
+
+
+def data_denormalize(img, bit_depth):
+    """ Denormalize the data to [0, n-bit)
+
+    Args:
+        img (torch.Tensor | np.ndarray): images in torch.Tensor
+        bit_depth (int): original data range in n-bit
+    Returns:
+        dict[str, torch.Tensor]: image after denormalize
+    """
+    max_value = 2 ** bit_depth - .5
+    ret = img * max_value
+    return ret
+
 
 
 if __name__ == "__main__":

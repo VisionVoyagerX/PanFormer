@@ -14,7 +14,6 @@ from data_loader.DataLoader import DIV2K, GaoFen2, Sev2Mod, WV3, GaoFen2panforme
 from models.panformer import CrossSwinTransformer
 from utils import *
 
-
 def main():
     # Prepare device
     # TODO add more code for server
@@ -23,17 +22,17 @@ def main():
 
     # Initialize DataLoader
     train_dataset = GaoFen2(
-        Path("/home/ubuntu/project/Data/GaoFen-2/train/train_gf2-001.h5"), transforms=[(RandomHorizontalFlip(1), 0.3), (RandomVerticalFlip(1), 0.3)]) #/home/ubuntu/project
+        Path("F:/Data/GaoFen-2/train/train_gf2-001.h5"), transforms=[(RandomHorizontalFlip(1), 0.3), (RandomVerticalFlip(1), 0.3)]) #/home/ubuntu/project
     train_loader = DataLoader(
         dataset=train_dataset, batch_size=4, shuffle=True, drop_last=True)
 
     validation_dataset = GaoFen2(
-        Path("/home/ubuntu/project/Data/GaoFen-2/val/valid_gf2.h5"))
+        Path("F:/Data/GaoFen-2/val/valid_gf2.h5"))
     validation_loader = DataLoader(
         dataset=validation_dataset, batch_size=1, shuffle=True)
 
     test_dataset = GaoFen2(
-        Path("/home/ubuntu/project/Data/GaoFen-2/drive-download-20230623T170619Z-001/test_gf2_multiExm1.h5"))
+        Path("F:/Data/GaoFen-2/drive-download-20230623T170619Z-001/test_gf2_multiExm1.h5"))
     test_loader = DataLoader(
         dataset=test_dataset, batch_size=1, shuffle=False)
 
@@ -269,7 +268,6 @@ def main():
                                 current_daytime + '_best_test')
 
     print('==> training ended <==')
-
 
 if __name__ == '__main__':
     main()
