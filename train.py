@@ -75,12 +75,11 @@ def main():
     steps = 200000
     save_interval = 1000
     report_interval = 50
-    test_intervals = [100000, 200000, 300000, 400000,
-                      500000, 600000, 700000, 800000, 900000, 1000000]
-    evaluation_interval = [100000, 200000, 300000, 400000,
-                           500000, 600000, 700000, 800000, 900000, 1000000]
+    test_intervals = [40000, 60000, 100000, 
+                      140000, 160000, 200000]
+    evaluation_interval = [40000, 60000, 100000, 
+                      140000, 160000, 200000]
     
-    lr_decay_intervals = [100000, 200000]
     val_steps = 100
 
     # Model summary
@@ -107,7 +106,7 @@ def main():
                           'tr_metrics': tr_metrics,
                           'val_metrics': val_metrics,
                           'test_metrics': test_metrics}
-            save_checkpoint(checkpoint, 'pnn_model', current_daytime)
+            save_checkpoint(checkpoint, 'panformer', current_daytime)
 
         try:
             # Samples the batch
@@ -215,7 +214,7 @@ def main():
                               'tr_metrics': tr_metrics,
                               'val_metrics': val_metrics,
                               'test_metrics': test_metrics}
-                save_checkpoint(checkpoint, 'pnn_model',
+                save_checkpoint(checkpoint, 'panformer',
                                 current_daytime + '_best_eval')
 
         # test model
