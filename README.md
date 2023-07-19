@@ -73,7 +73,7 @@ Params size (MB): 2.02
 Estimated Total Size (MB): 102.27
 ==========================================================================================
 ```
-# Statistics
+# Training statistics
 
 ![alt text](https://github.com/nickdndndn/PanFormer/blob/main/results/Figures.png?raw=true)
 
