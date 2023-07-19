@@ -73,10 +73,20 @@ Params size (MB): 2.02
 Estimated Total Size (MB): 102.27
 ==========================================================================================
 ```
-# Training statistics
+# GaoFen-2 Results
+## Training statistics
 
 ![alt text](https://github.com/nickdndndn/PanFormer/blob/main/results/Figures.png?raw=true)
 
-# Visualization of Results
+## Visualization of Results
+
+![alt text](https://github.com/nickdndndn/PanFormer/blob/main/results/Images.png?raw=true)
+
+# WorldView-3 Results
+## Training statistics
+
+![alt text](https://github.com/nickdndndn/PanFormer/blob/main/results/Figures.png?raw=true)
+
+## Visualization of Results
 
 ![alt text](https://github.com/nickdndndn/PanFormer/blob/main/results/Images.png?raw=true)
