@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Resize, RandomHorizontalFlip, RandomVerticalFlip, RandomRotation
 from torchmetrics import MetricCollection, PeakSignalNoiseRatio, StructuralSimilarityIndexMeasure
 from torch.optim.lr_scheduler import StepLR
-from torchsummary import summary
+from torchinfo import summary
 
 from data_loader.DataLoader import DIV2K, GaoFen2, Sev2Mod, WV3, GaoFen2panformer
 from models.panformer import CrossSwinTransformer
@@ -24,23 +24,22 @@ def main():
     print(device)
 
     # Initialize DataLoader
-    train_dataset = GaoFen2(
-        Path("F:/Data/GaoFen-2/train/train_gf2-001.h5"), transforms=[(RandomHorizontalFlip(1), 0.3), (RandomVerticalFlip(1), 0.3)])  # /home/ubuntu/project
+    train_dataset = WV3(
+        Path("F:/Data/WorldView3/train/train_wv3-001.h5"), transforms=[(RandomHorizontalFlip(1), 0.3), (RandomVerticalFlip(1), 0.3)])  # /home/ubuntu/project
     train_loader = DataLoader(
         dataset=train_dataset, batch_size=128, shuffle=True, drop_last=True)
 
-    validation_dataset = GaoFen2(
-        Path("F:/Data/GaoFen-2/val/valid_gf2.h5"))
+    validation_dataset = WV3(
+        Path("F:/Data/WorldView3/val/valid_wv3.h5"))
     validation_loader = DataLoader(
         dataset=validation_dataset, batch_size=1, shuffle=True)
 
-    test_dataset = GaoFen2(
-        Path("F:/Data/GaoFen-2/drive-download-20230623T170619Z-001/test_gf2_multiExm1.h5"))
+    test_dataset = WV3(
+        Path("F:/Data/WorldView3/drive-download-20230627T115841Z-001/test_wv3_multiExm1.h5"))
     test_loader = DataLoader(
         dataset=test_dataset, batch_size=1, shuffle=False)
 
     # Initialize Model, optimizer, criterion and metrics
-    # TODO is imge_size necesasary?
     model = CrossSwinTransformer(n_feats=64, n_heads=8, head_dim=8, win_size=4,
                                  n_blocks=3, cross_module=['pan', 'ms'], cat_feat=['pan', 'ms'], mslr_mean=train_dataset.mslr_mean.to(device), mslr_std=train_dataset.mslr_std.to(device), pan_mean=train_dataset.pan_mean.to(device),
                                  pan_std=train_dataset.pan_std.to(device)).to(device)
