@@ -116,8 +116,8 @@ def main():
 
     # load checkpoint
     if continue_from_checkpoint:
-        tr_metrics, val_metrics, test_metrics = load_checkpoint(torch.load(
-            checkpoint_dir), model, optimizer, tr_metrics, val_metrics, test_metrics)
+        tr_metrics, val_metrics = load_checkpoint(torch.load(
+            checkpoint_dir), model, optimizer, tr_metrics, val_metrics)
         print('Model Loaded ...')
 
     def scaleMinMax(x):
