@@ -59,7 +59,7 @@ def main():
         dataset=test_dataset, batch_size=1, shuffle=False)
 
     # Initialize Model, optimizer, criterion and metrics
-    model = CrossSwinTransformer(n_feats=64, n_heads=8, head_dim=8, win_size=4,
+    model = CrossSwinTransformer(ms_channels=ms_channel, n_feats=64, n_heads=8, head_dim=8, win_size=4,
                                  n_blocks=3, cross_module=['pan', 'ms'], cat_feat=['pan', 'ms'], mslr_mean=train_dataset.mslr_mean.to(device), mslr_std=train_dataset.mslr_std.to(device), pan_mean=train_dataset.pan_mean.to(device),
                                  pan_std=train_dataset.pan_std.to(device)).to(device)
 
