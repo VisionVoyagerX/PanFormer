@@ -16,28 +16,50 @@ from utils import *
 
 
 def main():
+
+    choose_dataset = 'GaoFen2' #or 'WV3'
+
+    if choose_dataset == 'GaoFen2':
+        dataset = eval('GaoFen2')
+        tr_dir = '/home/ubuntu/project/Data/GaoFen-2/train/train_gf2-001.h5'
+        eval_dir = '/home/ubuntu/project/Data/GaoFen-2/val/valid_gf2.h5'
+        test_dir =  '/home/ubuntu/project/Data/GaoFen-2/drive-download-20230623T170619Z-001/test_gf2_multiExm1.h5'
+        checkpoint_dir = 'checkpoints/panformer_GF2/panformer_GF2_2023_07_19-00_31_49.pth.tar'
+        ms_channel = 4
+    elif choose_dataset == 'WV3':
+        dataset = eval('WV3')
+        tr_dir = '/home/ubuntu/project/Data/WorldView3/train/train_wv3-001.h5'
+        eval_dir = '/home/ubuntu/project/Data/WorldView3/val/valid_wv3.h5'
+        test_dir =  '/home/ubuntu/project/Data/WorldView3/drive-download-20230627T115841Z-001/test_wv3_multiExm1.h5'
+        checkpoint_dir = 'checkpoints/panformer_WV3/panformer_WV3_2023_07_23-16_44_45.pth.tar'
+        ms_channel = 8
+    else:
+        print(choose_dataset, ' does not exist')
+
+
+
     # Prepare device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
 
     # Initialize DataLoader
-    train_dataset = GaoFen2(
-        Path("/home/ubuntu/project/Data/GaoFen-2/train/train_gf2-001.h5"), transforms=[(RandomHorizontalFlip(1), 0.3), (RandomVerticalFlip(1), 0.3)])  # /home/ubuntu/project
+    train_dataset = dataset(
+        Path(tr_dir), transforms=[(RandomHorizontalFlip(1), 0.3), (RandomVerticalFlip(1), 0.3)])  # /home/ubuntu/project
     train_loader = DataLoader(
         dataset=train_dataset, batch_size=4, shuffle=True, drop_last=True)
 
-    validation_dataset = GaoFen2(
-        Path("/home/ubuntu/project/Data/GaoFen-2/val/valid_gf2.h5"))
+    validation_dataset = dataset(
+        Path(eval_dir))
     validation_loader = DataLoader(
         dataset=validation_dataset, batch_size=1, shuffle=True)
 
-    test_dataset = GaoFen2(
-        Path("/home/ubuntu/project/Data/GaoFen-2/drive-download-20230623T170619Z-001/test_gf2_multiExm1.h5"))
+    test_dataset = dataset(
+        Path(test_dir))
     test_loader = DataLoader(
         dataset=test_dataset, batch_size=1, shuffle=False)
 
     # Initialize Model, optimizer, criterion and metrics
-    model = CrossSwinTransformer(ms_channels=4, n_feats=64, n_heads=8, head_dim=8, win_size=4,
+    model = CrossSwinTransformer(ms_channels=ms_channel, n_feats=64, n_heads=8, head_dim=8, win_size=4,
                                  n_blocks=3, cross_module=['pan', 'ms'], cat_feat=['pan', 'ms'], mslr_mean=train_dataset.mslr_mean.to(device), mslr_std=train_dataset.mslr_std.to(device), pan_mean=train_dataset.pan_mean.to(device),
                                  pan_std=train_dataset.pan_std.to(device)).to(device)
 
@@ -80,7 +102,7 @@ def main():
     val_steps = 100
 
     # summary(model, pan_example, mslr_example, verbose=1)
-    summary(model, [(1, 1, 256, 256), (1, 4, 64, 64)],
+    summary(model, [(1, 1, 256, 256), (1, ms_channel, 64, 64)],
             dtypes=[torch.float32, torch.float32])
     print('corrected trainable parms: ', sum(p.numel()
           for p in model.parameters() if p.requires_grad))
@@ -88,7 +110,7 @@ def main():
     scheduler = StepLR(optimizer, step_size=1, gamma=0.99)
     lr_decay_intervals = 10000
     continue_from_checkpoint = True
-    checkpoint_path = 'checkpoints/panformer/panformer_2023_07_19-00_31_49.pth.tar'
+    checkpoint_path = checkpoint_dir
 
     # load checkpoint
     if continue_from_checkpoint:
