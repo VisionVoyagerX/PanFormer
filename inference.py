@@ -7,6 +7,8 @@ from torch.nn import L1Loss
 from torch.utils.data import DataLoader
 from torchvision.transforms import Resize, RandomHorizontalFlip, RandomVerticalFlip, RandomRotation
 from torchmetrics import MetricCollection, PeakSignalNoiseRatio, StructuralSimilarityIndexMeasure
+from torchmetrics.image import SpectralAngleMapper, ErrorRelativeGlobalDimensionlessSynthesis, RelativeAverageSpectralError, SpectralDistortionIndex
+from torchmetrics.regression import MeanSquaredError
 from torch.optim.lr_scheduler import StepLR
 from torchinfo import summary
 from torchmetrics.image import SpectralAngleMapper, ErrorRelativeGlobalDimensionlessSynthesis
@@ -125,6 +127,8 @@ def main():
         'ssim': StructuralSimilarityIndexMeasure().to(device),
         'sam': SpectralAngleMapper().to(device),
         'ergas': ErrorRelativeGlobalDimensionlessSynthesis().to(device),
+        'rase' : RelativeAverageSpectralError().to(device),
+        'mse' : MeanSquaredError().to(device),
     })
 
     val_metric_collection = MetricCollection({
@@ -132,6 +136,8 @@ def main():
         'ssim': StructuralSimilarityIndexMeasure().to(device),
         'sam': SpectralAngleMapper().to(device),
         'ergas': ErrorRelativeGlobalDimensionlessSynthesis().to(device),
+        'rase' : RelativeAverageSpectralError().to(device),
+        'mse' : MeanSquaredError().to(device),
     })
 
     test_metric_collection = MetricCollection({
@@ -139,7 +145,12 @@ def main():
         'ssim': StructuralSimilarityIndexMeasure().to(device),
         'sam': SpectralAngleMapper().to(device),
         'ergas': ErrorRelativeGlobalDimensionlessSynthesis().to(device),
+        'rase' : RelativeAverageSpectralError().to(device),
+        'mse' : MeanSquaredError().to(device),
     })
+
+    sdi_metric = SpectralDistortionIndex().to(device)
+    sdi_results = []
 
     tr_report_loss = 0
     val_report_loss = 0
@@ -210,6 +221,17 @@ def main():
             test_metric = test_metric_collection.forward(mssr, mshr)
             test_report_loss += test_loss
 
+            # Normalize preds and target for SDI
+            # print(mssr.max())
+            preds_normalized = mssr / mssr.max()
+            target_normalized = mshr / mshr.max()
+
+            # Calculate SDI on normalized predictions and targets
+            sdi_value = sdi_metric(preds_normalized, target_normalized)
+            # print(sdi_value)
+            sdi_results.append(sdi_value.item())
+
+
             figure, axis = plt.subplots(nrows=1, ncols=4, figsize=(15, 5))
             axis[0].imshow((scaleMinMax(mslr.permute(0, 3, 2, 1).detach().cpu()[
                             0, ...].numpy())).astype(np.float32)[..., :3], cmap='viridis')
@@ -246,12 +268,18 @@ def main():
         test_metric = test_metric_collection.compute()
         test_metric_collection.reset()
 
+        # Compute the average SDI
+        average_sdi = sum(sdi_results) / len(sdi_results)
+
         # Print final scores
         print(f"Final scores:\n"
               f"ERGAS: {test_metric['ergas'].item()}\n"
               f"SAM: {test_metric['sam'].item()}\n"
               f"PSNR: {test_metric['psnr'].item()}\n"
-              f"SSIM: {test_metric['ssim'].item()}")
+              f"SSIM: {test_metric['ssim'].item()}\n"
+              f"RASE: {test_metric['rase'].item()}\n"
+              f"MSE: {test_metric['mse'].item()}\n"
+              f"D_lambda: {average_sdi:.4f}")
 
 
 if __name__ == '__main__':
